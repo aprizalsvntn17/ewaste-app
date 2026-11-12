@@ -1,0 +1,19 @@
+{
+  "class_names": [
+    "Battery",
+    "Keyboard",
+    "Microwave",
+    "Mobile",
+    "Mouse",
+    "PCB",
+    "Player",
+    "Printer",
+    "Television",
+    "Washing Machine"
+  ],
+  "num_classes": 10,
+  "img_size": 224,
+  "best_val_acc": 96.66666666666667,
+  "test_acc": 92.33333333333333,
+  "architecture": "MobileNetV3-Small"
+}

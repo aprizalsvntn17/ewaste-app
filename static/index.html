@@ -1,0 +1,1587 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Kenali Sampah Elektronikmu — E-Waste Identifier</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    /* ═══════════════════════════════════════════════════════════════════
+       Reset & Design Tokens (HANYA Putih, Biru, Abu/Hitam, Merah Baterai)
+       ═══════════════════════════════════════════════════════════════════ */
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    :root {
+      /* Backgrounds */
+      --bg-canvas: #FFFFFF;
+      --bg-subtle: #F8FAFC;
+      --bg-card: #FFFFFF;
+      
+      /* Pure Blue Palette */
+      --blue-primary: #2563EB;
+      --blue-hover: #1D4ED8;
+      --blue-deep: #1E40AF;
+      --blue-light: #DBEAFE;
+      --blue-pale: #EFF6FF;
+      --blue-border: #BFDBFE;
+      --blue-border-subtle: #E2E8F0;
+      
+      /* Typography */
+      --text-main: #0F172A;
+      --text-muted: #475569;
+      --text-subtle: #64748B;
+      --text-inverse: #FFFFFF;
+
+      /* Battery Warning (Khusus Baterai Sesuai Panduan) */
+      --battery-bg: #FEF2F2;
+      --battery-border: #FECACA;
+      --battery-text: #DC2626;
+      --battery-text-dark: #991B1B;
+
+      /* Elevation & Radii */
+      --shadow-xs: 0 1px 2px rgba(15, 23, 42, 0.04);
+      --shadow-sm: 0 2px 8px rgba(37, 99, 235, 0.06);
+      --shadow-md: 0 8px 24px -4px rgba(37, 99, 235, 0.10), 0 2px 6px -1px rgba(0, 0, 0, 0.04);
+      --shadow-lg: 0 16px 36px -6px rgba(37, 99, 235, 0.12), 0 4px 12px -2px rgba(0, 0, 0, 0.04);
+      --shadow-btn: 0 8px 20px -4px rgba(37, 99, 235, 0.35);
+
+      --radius-sm: 10px;
+      --radius-md: 16px;
+      --radius-lg: 22px;
+      --radius-pill: 9999px;
+    }
+
+    body {
+      font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background-color: var(--bg-canvas);
+      color: var(--text-main);
+      min-height: 100vh;
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    /* ═══════════════════════════════════════════════════════════════════
+       Top Navigation Bar
+       ═══════════════════════════════════════════════════════════════════ */
+    .top-nav {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(8px);
+      border-bottom: 1px solid var(--blue-pale);
+      padding: 12px 20px;
+    }
+
+    .nav-container {
+      max-width: 600px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .nav-brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+      color: var(--text-main);
+      font-weight: 800;
+      font-size: 17px;
+      letter-spacing: -0.3px;
+    }
+
+    .brand-icon-box {
+      width: 34px;
+      height: 34px;
+      background: var(--blue-pale);
+      border: 1px solid var(--blue-light);
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--blue-primary);
+      font-size: 18px;
+    }
+
+    .nav-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--blue-pale);
+      color: var(--blue-primary);
+      border: 1px solid var(--blue-light);
+      padding: 4px 12px;
+      border-radius: var(--radius-pill);
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .nav-dot {
+      width: 6px;
+      height: 6px;
+      background: var(--blue-primary);
+      border-radius: 50%;
+      animation: pulseDot 2s infinite;
+    }
+
+    @keyframes pulseDot {
+      0% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.4; transform: scale(0.85); }
+      100% { opacity: 1; transform: scale(1); }
+    }
+
+    /* ═══════════════════════════════════════════════════════════════════
+       Page Layout
+       ═══════════════════════════════════════════════════════════════════ */
+    .page-wrapper {
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 24px 16px 56px;
+    }
+
+    /* ═══════════════════════════════════════════════════════════════════
+       1. Hero Header
+       ═══════════════════════════════════════════════════════════════════ */
+    .hero-section {
+      text-align: center;
+      margin-bottom: 28px;
+      padding-top: 8px;
+    }
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--blue-pale);
+      border: 1px solid var(--blue-light);
+      color: var(--blue-primary);
+      font-size: 13px;
+      font-weight: 600;
+      padding: 5px 14px;
+      border-radius: var(--radius-pill);
+      margin-bottom: 14px;
+    }
+
+    .hero-section h1 {
+      font-size: clamp(24px, 6vw, 32px);
+      font-weight: 800;
+      color: var(--text-main);
+      line-height: 1.25;
+      letter-spacing: -0.6px;
+      margin-bottom: 8px;
+    }
+
+    .hero-section h1 span {
+      color: var(--blue-primary);
+    }
+
+    .hero-section p {
+      font-size: clamp(15px, 4vw, 16px);
+      color: var(--text-muted);
+      font-weight: 500;
+      max-width: 440px;
+      margin: 0 auto;
+      line-height: 1.5;
+    }
+
+    /* ═══════════════════════════════════════════════════════════════════
+       2. Upload Card (Area Putus-Putus Biru Muda)
+       ═══════════════════════════════════════════════════════════════════ */
+    .upload-box {
+      background-color: var(--blue-pale);
+      border: 2px dashed var(--blue-border);
+      border-radius: var(--radius-lg);
+      padding: 36px 20px 28px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+      user-select: none;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .upload-box:hover, .upload-box.dragover {
+      background-color: var(--blue-light);
+      border-color: var(--blue-primary);
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-md);
+    }
+
+    .upload-icon-circle {
+      width: 76px;
+      height: 76px;
+      background: #FFFFFF;
+      border: 1px solid var(--blue-light);
+      border-radius: 50%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 16px;
+      color: var(--blue-primary);
+      box-shadow: var(--shadow-sm);
+      transition: transform 0.2s ease;
+    }
+
+    .upload-box:hover .upload-icon-circle {
+      transform: scale(1.05);
+    }
+
+    .upload-icon-circle svg {
+      width: 36px;
+      height: 36px;
+      stroke-width: 2;
+    }
+
+    .upload-main-title {
+      font-size: clamp(17px, 4.5vw, 19px);
+      font-weight: 700;
+      color: var(--blue-primary);
+      margin-bottom: 6px;
+      letter-spacing: -0.2px;
+    }
+
+    .upload-sub-text {
+      font-size: 13.5px;
+      color: var(--text-muted);
+      margin-bottom: 16px;
+      line-height: 1.4;
+    }
+
+    .upload-badges {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .pill-info {
+      font-size: 11.5px;
+      font-weight: 600;
+      color: var(--text-muted);
+      background: #FFFFFF;
+      border: 1px solid var(--blue-light);
+      padding: 4px 10px;
+      border-radius: var(--radius-pill);
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    #fileInput {
+      display: none;
+    }
+
+    /* ═══════════════════════════════════════════════════════════════════
+       3. Pratinjau Gambar Terpilih
+       ═══════════════════════════════════════════════════════════════════ */
+    .preview-card {
+      display: none;
+      position: relative;
+      margin-top: 20px;
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      background: var(--blue-pale);
+      border: 1.5px solid var(--blue-light);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .preview-inner {
+      position: relative;
+      width: 100%;
+      height: 280px;
+      background: var(--blue-subtle, #F1F5F9);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+    .preview-inner img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      display: block;
+      background: var(--bg-canvas);
+    }
+
+    .btn-change-photo {
+      position: absolute;
+      top: 14px;
+      right: 14px;
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(4px);
+      color: var(--blue-primary);
+      border: 1.5px solid var(--blue-border);
+      padding: 7px 16px;
+      border-radius: var(--radius-pill);
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(15, 23, 42, 0.10);
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.15s ease;
+    }
+
+    .btn-change-photo:hover {
+      background: #FFFFFF;
+      border-color: var(--blue-primary);
+      transform: translateY(-1px);
+    }
+
+    .preview-footer {
+      padding: 10px 16px;
+      background: #FFFFFF;
+      border-top: 1px solid var(--blue-pale);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 12.5px;
+      color: var(--text-muted);
+    }
+
+    .preview-filename {
+      font-weight: 600;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 220px;
+    }
+
+    /* ═══════════════════════════════════════════════════════════════════
+       Tombol Utama "Kenali Sekarang"
+       ═══════════════════════════════════════════════════════════════════ */
+    .btn-action-primary {
+      display: none;
+      width: 100%;
+      background: var(--blue-primary);
+      color: #FFFFFF;
+      font-size: 18px;
+      font-weight: 700;
+      padding: 17px 24px;
+      border: none;
+      border-radius: var(--radius-md);
+      cursor: pointer;
+      margin-top: 18px;
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+      box-shadow: var(--shadow-btn);
+      text-align: center;
+      position: relative;
+      letter-spacing: -0.2px;
+    }
+
+    .btn-action-primary:hover {
+      background: var(--blue-hover);
+      transform: translateY(-2px);
+      box-shadow: 0 12px 28px -4px rgba(37, 99, 235, 0.45);
+    }
+
+    .btn-action-primary:active {
+      transform: translateY(0);
+    }
+
+    .btn-action-primary:disabled {
+      background: var(--blue-border);
+      cursor: not-allowed;
+      box-shadow: none;
+      transform: none;
+    }
+
+    /* ═══════════════════════════════════════════════════════════════════
+       Indikator Loading Sederhana
+       ═══════════════════════════════════════════════════════════════════ */
+    .loading-container {
+      display: none;
+      text-align: center;
+      padding: 32px 16px 20px;
+      background: var(--blue-pale);
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--blue-light);
+      margin-top: 18px;
+    }
+
+    .dual-spinner {
+      width: 48px;
+      height: 48px;
+      border: 4px solid var(--blue-light);
+      border-top-color: var(--blue-primary);
+      border-radius: 50%;
+      animation: spinRing 0.8s linear infinite;
+      margin: 0 auto 14px;
+    }
+
+    @keyframes spinRing {
+      to { transform: rotate(360deg); }
+    }
+
+    .loading-primary-text {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--blue-primary);
+      margin-bottom: 4px;
+    }
+
+    .loading-secondary-text {
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+
+    /* ═══════════════════════════════════════════════════════════════════
+       Pesan Error Ramah
+       ═══════════════════════════════════════════════════════════════════ */
+    .alert-error {
+      display: none;
+      background: var(--battery-bg);
+      border: 1.5px solid var(--battery-border);
+      border-radius: var(--radius-md);
+      padding: 16px 18px;
+      margin-top: 18px;
+      color: var(--battery-text);
+      font-size: 14.5px;
+      font-weight: 600;
+      text-align: center;
+      line-height: 1.4;
+    }
+
+    /* ═══════════════════════════════════════════════════════════════════
+       4. Kartu Hasil Klasifikasi (Professional Result Card)
+       ═══════════════════════════════════════════════════════════════════ */
+    .result-sheet {
+      display: none;
+      background: #FFFFFF;
+      border: 1.5px solid var(--blue-light);
+      border-radius: var(--radius-lg);
+      padding: 24px 20px;
+      margin-top: 24px;
+      box-shadow: var(--shadow-lg);
+      animation: slideUpFade 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    @keyframes slideUpFade {
+      from { opacity: 0; transform: translateY(16px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Category Header Banner */
+    .result-hero-banner {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      background: var(--blue-pale);
+      border: 1px solid var(--blue-light);
+      border-radius: var(--radius-md);
+      padding: 18px 16px;
+      margin-bottom: 22px;
+    }
+
+    .result-icon-bubble {
+      width: 64px;
+      height: 64px;
+      background: #FFFFFF;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--blue-light);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 40px;
+      flex-shrink: 0;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .result-title-group {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .result-pretitle {
+      font-size: 11.5px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      color: var(--blue-primary);
+      margin-bottom: 2px;
+    }
+
+    .result-category-title {
+      font-size: clamp(22px, 5.5vw, 26px);
+      font-weight: 800;
+      color: var(--text-main);
+      line-height: 1.2;
+      letter-spacing: -0.4px;
+    }
+
+    .result-reassurance-text {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-muted);
+      margin-top: 4px;
+      line-height: 1.35;
+    }
+
+    /* Confidence Progress */
+    .confidence-panel {
+      background: var(--bg-subtle);
+      border: 1px solid var(--blue-border-subtle);
+      border-radius: var(--radius-md);
+      padding: 16px 18px;
+      margin-bottom: 20px;
+    }
+
+    .confidence-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      margin-bottom: 10px;
+    }
+
+    .confidence-label {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+
+    .confidence-value {
+      font-size: 22px;
+      font-weight: 800;
+      color: var(--blue-primary);
+      letter-spacing: -0.5px;
+    }
+
+    .progress-track {
+      background: var(--blue-light);
+      border-radius: var(--radius-pill);
+      height: 12px;
+      overflow: hidden;
+      width: 100%;
+    }
+
+    .progress-fill {
+      background: var(--blue-primary);
+      height: 100%;
+      width: 0%;
+      border-radius: var(--radius-pill);
+      transition: width 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    /* Top 3 Predictions */
+    .top3-panel {
+      background: #FFFFFF;
+      border: 1px solid var(--blue-border-subtle);
+      border-radius: var(--radius-md);
+      padding: 14px 16px;
+      margin-bottom: 20px;
+    }
+
+    .top3-header-text {
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--text-subtle);
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .top3-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 0;
+      border-bottom: 1px solid var(--blue-pale);
+      font-size: 13.5px;
+    }
+
+    .top3-row:last-child {
+      border-bottom: none;
+      padding-bottom: 2px;
+    }
+
+    .top3-left {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: 600;
+      color: var(--text-main);
+    }
+
+    .top3-right {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .top3-mini-bar-track {
+      width: 60px;
+      height: 6px;
+      background: var(--blue-pale);
+      border-radius: var(--radius-pill);
+      overflow: hidden;
+    }
+
+    .top3-mini-bar-fill {
+      height: 100%;
+      background: var(--blue-primary);
+      border-radius: var(--radius-pill);
+    }
+
+    .top3-percent {
+      font-weight: 700;
+      color: var(--blue-primary);
+      min-width: 36px;
+      text-align: right;
+    }
+
+    /* Kotak Cara Menangani (Handling Section) */
+    .handling-card {
+      background: var(--blue-pale);
+      border: 1.5px solid var(--blue-light);
+      border-radius: var(--radius-md);
+      padding: 18px 18px;
+      margin-bottom: 22px;
+      transition: all 0.2s ease;
+    }
+
+    /* Khusus Baterai: Merah Lembut Sesuai Aturan */
+    .handling-card.is-battery {
+      background: var(--battery-bg);
+      border-color: var(--battery-border);
+    }
+
+    .handling-card-title {
+      font-size: 15.5px;
+      font-weight: 700;
+      color: var(--blue-primary);
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .handling-card.is-battery .handling-card-title {
+      color: var(--battery-text);
+    }
+
+    .handling-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 9px;
+    }
+
+    .handling-list li {
+      position: relative;
+      padding-left: 20px;
+      font-size: 14px;
+      color: var(--text-muted);
+      line-height: 1.45;
+    }
+
+    .handling-list li::before {
+      content: "•";
+      position: absolute;
+      left: 6px;
+      top: -1px;
+      color: var(--blue-primary);
+      font-size: 20px;
+      line-height: 1;
+    }
+
+    .handling-card.is-battery .handling-list li::before {
+      color: var(--battery-text);
+    }
+
+    .handling-card.is-battery .handling-list li {
+      color: var(--battery-text-dark);
+      font-weight: 500;
+    }
+
+    /* Feedback Interactive Area */
+    .feedback-module {
+      border-top: 1px solid var(--blue-light);
+      padding-top: 20px;
+      text-align: center;
+    }
+
+    .feedback-prompt {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--text-main);
+      margin-bottom: 14px;
+    }
+
+    .feedback-btn-group {
+      display: flex;
+      gap: 10px;
+    }
+
+    .btn-feedback-action {
+      flex: 1;
+      padding: 13px 18px;
+      border-radius: var(--radius-sm);
+      font-size: 14.5px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.18s ease;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    .btn-fb-confirm {
+      background: var(--blue-primary);
+      color: #FFFFFF;
+      border: 1.5px solid var(--blue-primary);
+      box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
+    }
+
+    .btn-fb-confirm:hover {
+      background: var(--blue-hover);
+      border-color: var(--blue-hover);
+      transform: translateY(-1px);
+    }
+
+    .btn-fb-correct {
+      background: #FFFFFF;
+      color: var(--text-main);
+      border: 1.5px solid var(--blue-border);
+    }
+
+    .btn-fb-correct:hover {
+      background: var(--blue-pale);
+      border-color: var(--blue-primary);
+      color: var(--blue-primary);
+      transform: translateY(-1px);
+    }
+
+    /* 6 Pilihan Kategori Koreksi */
+    .correction-drawer {
+      display: none;
+      margin-top: 16px;
+      padding-top: 16px;
+      border-top: 1px dashed var(--blue-border);
+      text-align: left;
+      animation: fadeIn 0.25s ease;
+    }
+
+    .correction-guide-title {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--blue-primary);
+      margin-bottom: 10px;
+      text-align: center;
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+    }
+
+    .correction-options-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 8px;
+    }
+
+    @media (min-width: 440px) {
+      .correction-options-grid {
+        grid-template-columns: repeat(3, 1fr);
+      }
+    }
+
+    .btn-category-option {
+      background: #FFFFFF;
+      border: 1.5px solid var(--blue-light);
+      border-radius: var(--radius-sm);
+      padding: 12px 14px;
+      font-size: 13.5px;
+      font-weight: 600;
+      color: var(--text-main);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.15s ease;
+    }
+
+    .btn-category-option:hover {
+      background: var(--blue-pale);
+      border-color: var(--blue-primary);
+      color: var(--blue-primary);
+      transform: translateY(-1px);
+    }
+
+    .feedback-acknowledgment {
+      display: none;
+      background: var(--blue-pale);
+      border: 1.5px solid var(--blue-light);
+      border-radius: var(--radius-sm);
+      padding: 14px 16px;
+      margin-top: 14px;
+      color: var(--blue-primary);
+      font-size: 14px;
+      font-weight: 700;
+      text-align: center;
+      line-height: 1.4;
+    }
+
+    /* ═══════════════════════════════════════════════════════════════════
+       5. Tombol "Foto Lagi"
+       ═══════════════════════════════════════════════════════════════════ */
+    .btn-retake {
+      display: none;
+      width: 100%;
+      background: var(--blue-pale);
+      color: var(--blue-primary);
+      border: 1.5px solid var(--blue-border);
+      font-size: 16px;
+      font-weight: 700;
+      padding: 15px 20px;
+      border-radius: var(--radius-md);
+      cursor: pointer;
+      margin-top: 16px;
+      text-align: center;
+      transition: all 0.2s ease;
+      letter-spacing: -0.2px;
+    }
+
+    .btn-retake:hover {
+      background: var(--blue-light);
+      border-color: var(--blue-primary);
+      transform: translateY(-1px);
+    }
+
+    /* ═══════════════════════════════════════════════════════════════════
+       6. Bagian "Riwayat Terakhir" (5 Klasifikasi Terakhir)
+       ═══════════════════════════════════════════════════════════════════ */
+    .history-card-section {
+      margin-top: 40px;
+      padding-top: 28px;
+      border-top: 1.5px solid var(--blue-light);
+    }
+
+    .history-bar-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 14px;
+    }
+
+    .history-section-title {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .history-counter-pill {
+      font-size: 12px;
+      font-weight: 700;
+      background: var(--blue-pale);
+      border: 1px solid var(--blue-light);
+      color: var(--blue-primary);
+      padding: 2px 9px;
+      border-radius: var(--radius-pill);
+    }
+
+    .history-flow-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .history-flow-item {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      background: #FFFFFF;
+      border: 1px solid var(--blue-light);
+      border-radius: var(--radius-md);
+      padding: 10px 14px;
+      transition: all 0.2s ease;
+      box-shadow: var(--shadow-xs);
+    }
+
+    .history-flow-item:hover {
+      background: var(--blue-pale);
+      border-color: var(--blue-border);
+      transform: translateY(-1px);
+    }
+
+    .history-thumb-img {
+      width: 48px;
+      height: 48px;
+      border-radius: 10px;
+      object-fit: cover;
+      background: var(--blue-pale);
+      border: 1px solid var(--blue-light);
+      flex-shrink: 0;
+    }
+
+    .history-meta-box {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .history-category-label {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .history-time-stamp {
+      font-size: 12px;
+      color: var(--text-subtle);
+      margin-top: 2px;
+    }
+
+    .history-conf-badge {
+      font-size: 13.5px;
+      font-weight: 700;
+      color: var(--blue-primary);
+      background: var(--blue-pale);
+      border: 1px solid var(--blue-light);
+      padding: 4px 10px;
+      border-radius: var(--radius-pill);
+      flex-shrink: 0;
+    }
+
+    .history-empty-placeholder {
+      text-align: center;
+      font-size: 13.5px;
+      color: var(--text-subtle);
+      padding: 24px 0;
+      background: var(--bg-subtle);
+      border-radius: var(--radius-md);
+      border: 1px dashed var(--blue-border-subtle);
+    }
+
+    /* ═══════════════════════════════════════════════════════════════════
+       Footer
+       ═══════════════════════════════════════════════════════════════════ */
+    .app-footer {
+      text-align: center;
+      padding-top: 36px;
+      font-size: 13px;
+      color: var(--text-subtle);
+      border-top: 1px solid var(--blue-pale);
+      margin-top: 40px;
+    }
+
+    .app-footer span {
+      font-weight: 600;
+      color: var(--blue-primary);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Sticky Header -->
+  <header class="top-nav">
+    <div class="nav-container">
+      <a href="/" class="nav-brand">
+        <div class="brand-icon-box">♻️</div>
+        <span>KenaliE-Waste</span>
+      </a>
+      <div class="nav-badge">
+        <span class="nav-dot"></span>
+        <span>Model AI Aktif</span>
+      </div>
+    </div>
+  </header>
+
+  <div class="page-wrapper">
+
+    <!-- 1. Hero Header Sesuai Spesifikasi -->
+    <section class="hero-section">
+      <div class="hero-badge">
+        <span>⚡</span>
+        <span>Klasifikasi Instan &amp; Akurat</span>
+      </div>
+      <h1>Kenali <span>Sampah Elektronik</span>mu</h1>
+      <p>Foto barangnya, kami bantu tentukan jenisnya.</p>
+    </section>
+
+    <!-- 2. Area Besar Putus-Putus Biru Muda (Mendukung Kamera HP, Unggah File, Drag & Drop) -->
+    <div class="upload-box" id="uploadZone" role="button" tabindex="0" aria-label="Unggah foto sampah elektronik">
+      <div id="uploadPrompt">
+        <div class="upload-icon-circle">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
+            <circle cx="12" cy="13" r="4"></circle>
+          </svg>
+        </div>
+        <div class="upload-main-title">Ketuk untuk foto atau pilih gambar</div>
+        <div class="upload-sub-text">Bisa langsung dari kamera HP, berkas foto galeri, atau seret &amp; lepas</div>
+        <div class="upload-badges">
+          <span class="pill-info">📷 Kamera HP</span>
+          <span class="pill-info">📁 File JPG/PNG</span>
+          <span class="pill-info">⚡ Maks 5 MB</span>
+        </div>
+      </div>
+
+      <!-- 3. Pratinjau Gambar Terpilih -->
+      <div class="preview-card" id="previewCard">
+        <div class="preview-inner">
+          <img id="previewImg" src="" alt="Pratinjau Sampah Elektronik" />
+          <button type="button" class="btn-change-photo" id="btnChangePhoto" aria-label="Ganti foto">
+            <span>🔄</span> Ganti Foto
+          </button>
+        </div>
+        <div class="preview-footer">
+          <span class="preview-filename" id="previewFilename">foto-terpilih.jpg</span>
+          <span>Siap diperiksa</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Hidden Input File (accept JPG/PNG, kamera HP) -->
+    <input type="file" id="fileInput" accept="image/jpeg,image/png,image/jpg" capture="environment" />
+
+    <!-- Tombol Biru Besar "Kenali Sekarang" -->
+    <button type="button" class="btn-action-primary" id="btnPredict">
+      Kenali Sekarang 🔍
+    </button>
+
+    <!-- Indikator Loading Sederhana -->
+    <div class="loading-container" id="loadingContainer" role="status" aria-live="polite">
+      <div class="dual-spinner"></div>
+      <div class="loading-primary-text">Sedang memeriksa gambar...</div>
+      <div class="loading-secondary-text">Model AI sedang mengenali karakteristik barang Anda</div>
+    </div>
+
+    <!-- Pesan Error Ramah -->
+    <div class="alert-error" id="errorCard" role="alert"></div>
+
+    <!-- 4. Kartu Hasil Klasifikasi (Satu Kartu Lengkap) -->
+    <section class="result-sheet" id="resultSheet" aria-label="Hasil Analisis E-Waste">
+
+      <!-- Ikon dan Nama Kategori Huruf Besar -->
+      <div class="result-hero-banner">
+        <div class="result-icon-bubble" id="resIcon">🔋</div>
+        <div class="result-title-group">
+          <div class="result-pretitle">Jenis Terdeteksi</div>
+          <h2 class="result-category-title" id="resName">BATERAI</h2>
+          <div class="result-reassurance-text" id="resMessage">Kami cukup yakin ini adalah Baterai.</div>
+        </div>
+      </div>
+
+      <!-- Tingkat Keyakinan dengan Bar Biru dan Persen -->
+      <div class="confidence-panel">
+        <div class="confidence-header">
+          <span class="confidence-label">Tingkat Keyakinan Model</span>
+          <span class="confidence-value" id="resConfidence">96%</span>
+        </div>
+        <div class="progress-track">
+          <div class="progress-fill" id="resBar"></div>
+        </div>
+      </div>
+
+      <!-- 3 Kemungkinan Teratas -->
+      <div class="top3-panel">
+        <div class="top3-header-text">
+          <span>📊</span> Kemungkinan Teratas:
+        </div>
+        <div id="top3ListContainer">
+          <!-- Item terisi otomatis -->
+        </div>
+      </div>
+
+      <!-- Kotak "Cara menangani" (2-3 poin singkat per kategori, baterai ada peringatan khusus) -->
+      <div class="handling-card" id="handlingCard">
+        <div class="handling-card-title" id="handlingTitle">
+          <span>♻️</span> Cara menangani:
+        </div>
+        <ul class="handling-list" id="handlingList">
+          <li>Poin penanganan 1</li>
+          <li>Poin penanganan 2</li>
+        </ul>
+      </div>
+
+      <!-- Pertanyaan "Hasilnya sudah benar?" + 2 Tombol -->
+      <div class="feedback-module" id="feedbackModule">
+        <div class="feedback-prompt">Hasilnya sudah benar?</div>
+        <div class="feedback-btn-group" id="feedbackBtnGroup">
+          <button type="button" class="btn-feedback-action btn-fb-confirm" id="btnYes">
+            ✓ Ya, benar
+          </button>
+          <button type="button" class="btn-feedback-action btn-fb-correct" id="btnNo">
+            ✕ Bukan, koreksi
+          </button>
+        </div>
+
+        <!-- Panel 6 Pilihan Kategori Koreksi -->
+        <div class="correction-drawer" id="correctionDrawer">
+          <div class="correction-guide-title">Pilih kategori yang tepat:</div>
+          <div class="correction-options-grid" id="correctionOptionsGrid">
+            <!-- 6 tombol kategori dimuat otomatis -->
+          </div>
+        </div>
+
+        <!-- Pesan Terima Kasih Umpan Balik -->
+        <div class="feedback-acknowledgment" id="feedbackAcknowledgment">
+          Terima kasih atas koreksinya! Informasi ini sangat membantu.
+        </div>
+      </div>
+
+    </section>
+
+    <!-- 5. Tombol Kedua "Foto Lagi" untuk Mengulang -->
+    <button type="button" class="btn-retake" id="btnRetake">
+      📸 Foto Lagi
+    </button>
+
+    <!-- 6. Bagian Kecil "Riwayat Terakhir" (5 Klasifikasi Terakhir) -->
+    <section class="history-card-section" id="historySection">
+      <div class="history-bar-header">
+        <h3 class="history-section-title">
+          <span>🕒</span> Riwayat Terakhir
+        </h3>
+        <span class="history-counter-pill" id="historyBadge">0</span>
+      </div>
+      <div class="history-flow-list" id="historyFlowList">
+        <div class="history-empty-placeholder">Belum ada foto yang diperiksa.</div>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="app-footer">
+      <p><span>KenaliE-Waste</span> &bull; Solusi Cerdas Daur Ulang Sampah Elektronik &bull; 100% Gratis &amp; Ramah Lingkungan</p>
+    </footer>
+
+  </div>
+
+  <script>
+    /* ═══════════════════════════════════════════════════════════════
+       State & Referensi DOM
+       ═══════════════════════════════════════════════════════════════ */
+    const uploadZone = document.getElementById('uploadZone');
+    const uploadPrompt = document.getElementById('uploadPrompt');
+    const fileInput = document.getElementById('fileInput');
+    const previewCard = document.getElementById('previewCard');
+    const previewImg = document.getElementById('previewImg');
+    const previewFilename = document.getElementById('previewFilename');
+    const btnChangePhoto = document.getElementById('btnChangePhoto');
+    const btnPredict = document.getElementById('btnPredict');
+    const loadingContainer = document.getElementById('loadingContainer');
+    const errorCard = document.getElementById('errorCard');
+    const resultSheet = document.getElementById('resultSheet');
+    const resIcon = document.getElementById('resIcon');
+    const resName = document.getElementById('resName');
+    const resMessage = document.getElementById('resMessage');
+    const resConfidence = document.getElementById('resConfidence');
+    const resBar = document.getElementById('resBar');
+    const top3ListContainer = document.getElementById('top3ListContainer');
+    const handlingCard = document.getElementById('handlingCard');
+    const handlingTitle = document.getElementById('handlingTitle');
+    const handlingList = document.getElementById('handlingList');
+    const feedbackBtnGroup = document.getElementById('feedbackBtnGroup');
+    const btnYes = document.getElementById('btnYes');
+    const btnNo = document.getElementById('btnNo');
+    const correctionDrawer = document.getElementById('correctionDrawer');
+    const correctionOptionsGrid = document.getElementById('correctionOptionsGrid');
+    const feedbackAcknowledgment = document.getElementById('feedbackAcknowledgment');
+    const btnRetake = document.getElementById('btnRetake');
+    const historyFlowList = document.getElementById('historyFlowList');
+    const historyBadge = document.getElementById('historyBadge');
+
+    let currentFile = null;
+    let currentClassificationId = null;
+
+    // ── 6 Kategori Koreksi Sesuai Spesifikasi ──
+    const CORRECTION_OPTIONS = [
+      { key: "Laptop", nama: "Laptop", ikon: "💻" },
+      { key: "Ponsel", nama: "Ponsel", ikon: "📱" },
+      { key: "Kabel", nama: "Kabel", ikon: "🔌" },
+      { key: "Baterai", nama: "Baterai", ikon: "🔋" },
+      { key: "Papan Sirkuit", nama: "Papan Sirkuit", ikon: "🧩" },
+      { key: "Aksesori", nama: "Aksesori", ikon: "🎧" }
+    ];
+
+    // Inisialisasi tombol 6 kategori koreksi
+    function renderCorrectionOptions() {
+      correctionOptionsGrid.innerHTML = '';
+      CORRECTION_OPTIONS.forEach(opt => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'btn-category-option';
+        btn.innerHTML = `<span>${opt.ikon}</span><span>${opt.nama}</span>`;
+        btn.onclick = () => sendFeedback(false, opt.nama);
+        correctionOptionsGrid.appendChild(btn);
+      });
+    }
+
+    // ── File Selection & Camera Picker ──
+    uploadZone.addEventListener('click', (e) => {
+      if (e.target !== btnChangePhoto && !btnChangePhoto.contains(e.target)) {
+        if (!currentFile) fileInput.click();
+      }
+    });
+
+    btnChangePhoto.addEventListener('click', (e) => {
+      e.stopPropagation();
+      fileInput.click();
+    });
+
+    // ── Drag & Drop Handlers ──
+    ['dragenter', 'dragover'].forEach(name => {
+      uploadZone.addEventListener(name, (e) => {
+        e.preventDefault();
+        uploadZone.classList.add('dragover');
+      });
+    });
+
+    ['dragleave', 'drop'].forEach(name => {
+      uploadZone.addEventListener(name, (e) => {
+        e.preventDefault();
+        uploadZone.classList.remove('dragover');
+      });
+    });
+
+    uploadZone.addEventListener('drop', (e) => {
+      const files = e.dataTransfer.files;
+      if (files && files.length > 0) {
+        processSelectedFile(files[0]);
+      }
+    });
+
+    fileInput.addEventListener('change', (e) => {
+      if (e.target.files && e.target.files[0]) {
+        processSelectedFile(e.target.files[0]);
+      }
+    });
+
+    function processSelectedFile(file) {
+      hideError();
+      const validTypes = ['image/jpeg', 'image/png', 'image/jpg'];
+      if (!validTypes.includes(file.type.toLowerCase())) {
+        showError('Format file tidak didukung. Mohon gunakan foto berekstensi JPG atau PNG ya.');
+        return;
+      }
+
+      if (file.size > 5 * 1024 * 1024) {
+        showError('Ukuran gambar terlalu besar (maksimal 5 MB). Coba kompres dulu ya.');
+        return;
+      }
+
+      currentFile = file;
+      previewFilename.textContent = file.name;
+
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        previewImg.src = e.target.result;
+        uploadPrompt.style.display = 'none';
+        previewCard.style.display = 'block';
+        btnPredict.style.display = 'block';
+        resultSheet.style.display = 'none';
+        btnRetake.style.display = 'none';
+        btnPredict.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      };
+      reader.readAsDataURL(file);
+    }
+
+    // ── Tombol "Kenali Sekarang" ──
+    btnPredict.addEventListener('click', async () => {
+      if (!currentFile) return;
+
+      hideError();
+      resultSheet.style.display = 'none';
+      btnPredict.disabled = true;
+      loadingContainer.style.display = 'block';
+      loadingContainer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+
+      const formData = new FormData();
+      formData.append('file', currentFile);
+
+      try {
+        const response = await fetch('/predict', {
+          method: 'POST',
+          body: formData
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          showError(data.detail || 'Gambarnya kurang jelas, coba lagi ya.');
+          return;
+        }
+
+        renderPredictionResult(data);
+        loadHistory();
+      } catch (err) {
+        showError('Terjadi kendala jaringan. Pastikan koneksi server aktif ya.');
+      } finally {
+        loadingContainer.style.display = 'none';
+        btnPredict.disabled = false;
+      }
+    });
+
+    // ── Render Hasil Klasifikasi ──
+    function renderPredictionResult(data) {
+      currentClassificationId = data.id;
+
+      // Ikon dan nama kategori huruf besar
+      resIcon.textContent = data.ikon || '♻️';
+      resName.textContent = (data.kategori || '').toUpperCase();
+      resMessage.textContent = data.pesan;
+
+      // Tingkat keyakinan & progress bar
+      const confRound = Math.round(data.confidence);
+      resConfidence.textContent = confRound + '%';
+      resBar.style.width = '0%';
+      setTimeout(() => {
+        resBar.style.width = Math.min(100, Math.max(0, confRound)) + '%';
+      }, 50);
+
+      // Top 3 Kemungkinan
+      top3ListContainer.innerHTML = '';
+      if (data.top3 && data.top3.length > 0) {
+        data.top3.forEach(item => {
+          const itemPct = Math.round(item.confidence);
+          const row = document.createElement('div');
+          row.className = 'top3-row';
+          row.innerHTML = `
+            <div class="top3-left">
+              <span>${item.ikon || '📦'}</span>
+              <span>${item.kategori}</span>
+            </div>
+            <div class="top3-right">
+              <div class="top3-mini-bar-track">
+                <div class="top3-mini-bar-fill" style="width: ${itemPct}%"></div>
+              </div>
+              <span class="top3-percent">${itemPct}%</span>
+            </div>
+          `;
+          top3ListContainer.appendChild(row);
+        });
+      }
+
+      // Cara menangani (Baterai pakai nuansa merah lembut khusus)
+      const isBattery = data.bahaya || data.kategori_en === 'Battery' || (data.kategori || '').toLowerCase().includes('baterai');
+      if (isBattery) {
+        handlingCard.classList.add('is-battery');
+        handlingTitle.innerHTML = `<span>⚠️</span> Peringatan Bahaya &amp; Cara Menangani:`;
+      } else {
+        handlingCard.classList.remove('is-battery');
+        handlingTitle.innerHTML = `<span>♻️</span> Cara menangani:`;
+      }
+
+      handlingList.innerHTML = '';
+      if (data.penanganan && data.penanganan.length > 0) {
+        data.penanganan.forEach(point => {
+          const li = document.createElement('li');
+          li.textContent = point;
+          handlingList.appendChild(li);
+        });
+      }
+
+      // Reset state tombol umpan balik
+      feedbackBtnGroup.style.display = 'flex';
+      correctionDrawer.style.display = 'none';
+      feedbackAcknowledgment.style.display = 'none';
+
+      // Tampilkan kartu hasil & tombol Foto Lagi
+      btnPredict.style.display = 'none';
+      resultSheet.style.display = 'block';
+      btnRetake.style.display = 'block';
+
+      // Gulir halus ke kartu hasil
+      setTimeout(() => {
+        resultSheet.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }, 100);
+    }
+
+    // ── Umpan Balik (Feedback) ──
+    btnYes.addEventListener('click', () => {
+      sendFeedback(true, null);
+    });
+
+    btnNo.addEventListener('click', () => {
+      feedbackBtnGroup.style.display = 'none';
+      correctionDrawer.style.display = 'block';
+    });
+
+    async function sendFeedback(isCorrect, correctedCat) {
+      try {
+        await fetch('/feedback', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            classification_id: currentClassificationId,
+            is_correct: isCorrect,
+            corrected_category: correctedCat
+          })
+        });
+      } catch (err) {
+        console.error('Feedback error:', err);
+      }
+
+      feedbackBtnGroup.style.display = 'none';
+      correctionDrawer.style.display = 'none';
+
+      if (!isCorrect && correctedCat) {
+        feedbackAcknowledgment.innerHTML = `🙏 <b>Terima kasih!</b> Koreksi ke kategori <b>"${correctedCat}"</b> berhasil disimpan.`;
+      } else {
+        feedbackAcknowledgment.innerHTML = `🎉 <b>Terima kasih!</b> Senang bisa membantu Anda mengenali sampah elektronik ini.`;
+      }
+      feedbackAcknowledgment.style.display = 'block';
+    }
+
+    // ── 5. Tombol Foto Lagi (Reset) ──
+    btnRetake.addEventListener('click', () => {
+      currentFile = null;
+      fileInput.value = '';
+      previewImg.src = '';
+      uploadPrompt.style.display = 'block';
+      previewCard.style.display = 'none';
+      btnPredict.style.display = 'none';
+      resultSheet.style.display = 'none';
+      btnRetake.style.display = 'none';
+      hideError();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+
+    // ── 6. Muat Riwayat Terakhir ──
+    async function loadHistory() {
+      try {
+        const res = await fetch('/history');
+        if (!res.ok) return;
+        const data = await res.json();
+
+        historyBadge.textContent = data.length;
+        if (!data || data.length === 0) {
+          historyFlowList.innerHTML = '<div class="history-empty-placeholder">Belum ada foto yang diperiksa.</div>';
+          return;
+        }
+
+        historyFlowList.innerHTML = '';
+        data.forEach(item => {
+          const date = new Date(item.waktu);
+          const timeStr = date.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) + ' WIB';
+
+          const row = document.createElement('div');
+          row.className = 'history-flow-item';
+          row.innerHTML = `
+            <img class="history-thumb-img" src="${item.gambar_url}" alt="${item.kategori}" onerror="this.style.display='none'" />
+            <div class="history-meta-box">
+              <div class="history-category-label">
+                <span>${item.ikon || '📦'}</span>
+                <span>${item.kategori}</span>
+              </div>
+              <div class="history-time-stamp">${timeStr}</div>
+            </div>
+            <div class="history-conf-badge">${Math.round(item.confidence)}%</div>
+          `;
+          historyFlowList.appendChild(row);
+        });
+      } catch (err) {
+        console.error('History load error:', err);
+      }
+    }
+
+    function showError(msg) {
+      errorCard.textContent = msg;
+      errorCard.style.display = 'block';
+      errorCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+
+    function hideError() {
+      errorCard.style.display = 'none';
+    }
+
+    // Inisialisasi awal
+    renderCorrectionOptions();
+    loadHistory();
+
+    // Mode demo untuk tangkapan layar otomatis jika ada parameter query
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('demo') === 'battery') {
+      previewImg.src = '/uploads/fe559483259f4184af4baab7bc6cce73.jpg';
+      uploadPrompt.style.display = 'none';
+      previewCard.style.display = 'block';
+      renderPredictionResult({
+        id: 4,
+        kategori_en: "Battery",
+        kategori: "Baterai",
+        ikon: "🔋",
+        confidence: 95.7,
+        top3: [
+          { kategori_en: "Battery", kategori: "Baterai", ikon: "🔋", confidence: 95.7 },
+          { kategori_en: "Television", kategori: "Peralatan Elektronik (Televisi)", ikon: "📺", confidence: 2.0 },
+          { kategori_en: "PCB", kategori: "Papan Sirkuit", ikon: "🧩", confidence: 1.1 }
+        ],
+        penanganan: [
+          "Peringatan keselamatan: jangan ditekan, dibakar, atau dibasahi.",
+          "Pisahkan dari sampah rumah tangga biasa dan simpan di wadah kering.",
+          "Bawa ke titik pengumpulan baterai bekas atau drop-box e-waste terdekat."
+        ],
+        bahaya: true,
+        pesan: "Kami cukup yakin ini adalah Baterai."
+      });
+    } else if (urlParams.get('demo') === 'mouse') {
+      previewImg.src = '/uploads/a4a001a0ceb2461e94a19b65099a3cee.jpg';
+      uploadPrompt.style.display = 'none';
+      previewCard.style.display = 'block';
+      renderPredictionResult({
+        id: 2,
+        kategori_en: "Mouse",
+        kategori: "Aksesori (Mouse)",
+        ikon: "🖱️",
+        confidence: 96.9,
+        top3: [
+          { kategori_en: "Mouse", kategori: "Aksesori (Mouse)", ikon: "🖱️", confidence: 96.9 },
+          { kategori_en: "Mobile", kategori: "Ponsel", ikon: "📱", confidence: 1.5 },
+          { kategori_en: "PCB", kategori: "Papan Sirkuit", ikon: "🧩", confidence: 0.8 }
+        ],
+        penanganan: [
+          "Keluarkan baterai jika menggunakan tipe nirkabel (wireless).",
+          "Bawa ke tempat pengumpulan aksesori elektronik."
+        ],
+        bahaya: false,
+        pesan: "Kami cukup yakin ini adalah Aksesori (Mouse)."
+      });
+    } else if (urlParams.get('demo') === 'correction') {
+      previewImg.src = '/uploads/a4a001a0ceb2461e94a19b65099a3cee.jpg';
+      uploadPrompt.style.display = 'none';
+      previewCard.style.display = 'block';
+      renderPredictionResult({
+        id: 2,
+        kategori_en: "Mouse",
+        kategori: "Aksesori (Mouse)",
+        ikon: "🖱️",
+        confidence: 96.9,
+        top3: [
+          { kategori_en: "Mouse", kategori: "Aksesori (Mouse)", ikon: "🖱️", confidence: 96.9 }
+        ],
+        penanganan: [
+          "Keluarkan baterai jika menggunakan tipe nirkabel (wireless).",
+          "Bawa ke tempat pengumpulan aksesori elektronik."
+        ],
+        bahaya: false,
+        pesan: "Kami cukup yakin ini adalah Aksesori (Mouse)."
+      });
+      feedbackBtnGroup.style.display = 'none';
+      correctionDrawer.style.display = 'block';
+    }
+  </script>
+</body>
+</html>
